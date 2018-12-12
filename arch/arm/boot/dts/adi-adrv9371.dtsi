@@ -85,6 +85,9 @@
 			adi,signal-source = <SOURCE_SYSREF_VCO>;
 		};
 
+		jesd204 {
+			node-device;
+		};
 	};
 
 
@@ -167,6 +170,10 @@
 		adi,sniffer-profile-rx-bbf-3db-corner_khz = <100000>;
 		adi,sniffer-profile-rx-dec5-decimation = <5>;
 		adi,sniffer-profile-rx-fir-decimation = <4>;
+
+		jesd204 {
+			top-level-device;
+		};
 	};
 };
 
