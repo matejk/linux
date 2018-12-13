@@ -31,6 +31,18 @@ EXPORT_SYMBOL(jesd204_bus_type);
 
 static struct dentry *jesd204_debugfs_dentry;
 
+static int devm_jesd204_dev_match(struct device *dev, void *res, void *data)
+{
+	struct jesd204_dev **r = res;
+
+	if (!r || !*r) {
+		WARN_ON(!r || !*r);
+		return 0;
+	}
+
+	return *r == data;
+}
+
 struct jesd204_dev *jesd204_dev_register(struct device *dev,
 					 struct jesd204_dev_data *init)
 {
@@ -95,6 +107,50 @@ void jesd204_dev_unregister(struct jesd204_dev *jdev)
 	kref_put(&jdev->ref, __jesd204_dev_release);
 }
 EXPORT_SYMBOL(jesd204_dev_unregister);
+
+static void devm_jesd204_dev_unreg(struct device *dev, void *res)
+{
+	jesd204_dev_unregister(*(struct jesd204_dev **)res);
+}
+
+struct jesd204_dev *devm_jesd204_dev_register(struct device *dev,
+					      struct jesd204_dev_data *init)
+{
+	struct jesd204_dev **jdevp, *jdev;
+
+	jdevp = devres_alloc(devm_jesd204_dev_unreg, sizeof(*jdevp),
+			     GFP_KERNEL);
+	if (!jdevp)
+		return ERR_PTR(-ENOMEM);
+
+	jdev = jesd204_dev_register(dev, init);
+	if (!IS_ERR(jdev)) {
+		*jdevp = jdev;
+		devres_add(dev, jdevp);
+	} else {
+		devres_free(jdevp);
+	}
+
+	return jdev;
+}
+EXPORT_SYMBOL_GPL(devm_jesd204_dev_register);
+
+/**
+ * devm_jesd204_dev_unregister - Resource-managed jesd204_dev_unregister()
+ * @dev:	Device this jesd204_dev belongs to
+ * @jdev:	the jesd204_dev associated with the device
+ *
+ * Unregister jesd204_dev registered with devm_jesd204_dev_register().
+ */
+void devm_jesd204_dev_unregister(struct device *dev, struct jesd204_dev *jdev)
+{
+	int rc;
+
+	rc = devres_release(dev, devm_jesd204_dev_unreg,
+			    devm_jesd204_dev_match, jdev);
+	WARN_ON(rc);
+}
+EXPORT_SYMBOL_GPL(devm_jesd204_dev_unregister);
 
 static int __init jesd204_init(void)
 {
