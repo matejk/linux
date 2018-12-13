@@ -33,6 +33,8 @@
 #include <linux/clkdev.h>
 #include <linux/clk-provider.h>
 
+#include <linux/jesd204/jesd204.h>
+
 #include "mykonos/t_mykonos.h"
 #include "mykonos/mykonos.h"
 #include "mykonos/mykonos_gpio.h"
@@ -3983,10 +3985,15 @@ static int ad9371_clk_register(struct ad9371_rf_phy *phy,
 	return 0;
 }
 
+static struct jesd204_dev_data jesd204_ad9371_data = {
+	.name = "adrv9371-jesd204",
+};
+
 static int ad9371_probe(struct spi_device *spi)
 {
 	struct iio_dev *indio_dev;
 	struct ad9371_rf_phy *phy;
+	struct jesd204_dev *jdev;
 	struct clk *clk = NULL;
 	int ret;
 	u8 vers[3], rev;
@@ -4127,17 +4134,26 @@ static int ad9371_probe(struct spi_device *spi)
 	if (ret < 0)
 		goto out_clk_del_provider;
 
+	jesd204_ad9371_data.output_clocks = phy->clks;
+	jesd204_ad9371_data.output_clocks_num = NUM_AD9371_CLKS;
+	jdev = jesd204_dev_register(&spi->dev, &jesd204_ad9371_data);
+	if (IS_ERR(jdev)) {
+		ret = PTR_ERR(jdev);
+		goto out_iio_device_unregister;
+	}
+	phy->jesd204_dev = jdev;
+
 	ret = ad9371_register_axi_converter(phy);
 	if (ret < 0)
-		goto out_iio_device_unregister;
+		goto out_jesd204_device_unregister;
 
 	ret = sysfs_create_bin_file(&indio_dev->dev.kobj, &phy->bin);
 	if (ret < 0)
-		goto out_iio_device_unregister;
+		goto out_jesd204_device_unregister;
 
 	ret = sysfs_create_bin_file(&indio_dev->dev.kobj, &phy->bin_gt);
 	if (ret < 0)
-		goto out_iio_device_unregister;
+		goto out_jesd204_device_unregister;
 
 	ret = ad9371_register_debugfs(indio_dev);
 	if (ret < 0)
@@ -4153,6 +4169,8 @@ static int ad9371_probe(struct spi_device *spi)
 
 	return 0;
 
+out_jesd204_device_unregister:
+	jesd204_dev_unregister(phy->jesd204_dev);
 out_iio_device_unregister:
 	iio_device_unregister(indio_dev);
 out_clk_del_provider:
@@ -4168,6 +4186,9 @@ out_unregister_notifier:
 static int ad9371_remove(struct spi_device *spi)
 {
 	struct ad9371_rf_phy *phy = ad9371_spi_to_phy(spi);
+
+	if (phy->jesd204_dev)
+		jesd204_dev_unregister(phy->jesd204_dev);
 
 	release_firmware(phy->fw);
 	sysfs_remove_bin_file(&phy->indio_dev->dev.kobj, &phy->bin);
