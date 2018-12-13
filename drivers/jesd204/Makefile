@@ -4,7 +4,7 @@
 #
 
 obj-$(CONFIG_JESD204) += jesd204.o
-jesd204-y := jesd204-core.o
+jesd204-y := jesd204-core.o jesd204-link.o
 
 obj-$(CONFIG_AXI_JESD204B) += axi_jesd204b_v51.o axi_jesd204b_gt.o
 

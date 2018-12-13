@@ -83,8 +83,12 @@ struct jesd204_dev *jesd204_dev_register(struct device *dev,
 	kref_init(&jdev->ref);
 
 	mutex_lock(&jesd204_device_list_lock);
-	list_add(&jdev->list, &jesd204_device_list);
-	mutex_unlock(&jesd204_device_list_lock);
+	ret = jesd204_dev_init_links(jdev, init, &jesd204_device_list);
+	if (ret == 0)
+		list_add(&jdev->list, &jesd204_device_list);
+	mutex_lock(&jesd204_device_list_lock);
+	if (ret)
+		goto fail;
 
 	return jdev;
 

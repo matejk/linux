@@ -19,6 +19,8 @@ struct jesd204_dev_ops {
 struct jesd204_dev_data {
 	const char				*name;
 	struct jesd204_dev_ops			*ops;
+	struct clk				**output_clocks;
+	uint32_t				output_clocks_num;
 };
 
 struct jesd204_dev *jesd204_dev_register(struct device *dev,

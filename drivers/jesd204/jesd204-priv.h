@@ -15,6 +15,44 @@
 
 extern struct bus_type jesd204_bus_type;
 
+struct jesd204_dev;
+
+/**
+ * struct jesd204_link_in - JESD204 link input link
+ * @list		list entry for a device to keep a list of links
+ * @clk			clock to match with the out-clock of a JESD204 device
+ * @dev			ref to JESD204 device that provides this input link
+ */
+struct jesd204_link_in {
+	struct list_head		list;
+	struct clk			*clk;
+	struct jesd204_dev		*jdev;
+};
+
+/**
+ * struct jesd204_dev_list - list of JESD204 device refs
+ * @list		list entry for a link to keep a list of device refs
+ * @jdev		reference to JESD204 dev
+ */
+struct jesd204_dev_list {
+	struct list_head		list;
+	struct jesd204_dev		*jdev;
+};
+
+/**
+ * struct jesd204_link_out - JESD204 link output link
+ * @list		list entry for a device to keep a list of links
+ * @clk			clock this device outputs (to other devices)
+ * @jdev		reference to (parent) device that provides this output
+ * @dev_list		list of refs to JESD204 devs that have this dev as input
+ */
+struct jesd204_link_out {
+	struct list_head		list;
+	struct clk			*clk;
+	struct jesd204_dev		*jdev;
+	struct list_head		jdev_list;
+};
+
 /**
  * struct jesd204_dev - JESD204 device
  * @list		list entry for the framework to keep a list of devices
@@ -32,6 +70,13 @@ struct jesd204_dev {
 	struct device			*parent;
 	struct jesd204_dev_ops		*ops;
 	struct kref			ref;
+
+	struct list_head		inputs;
+	struct list_head		outputs;
 };
+
+int jesd204_dev_init_links(struct jesd204_dev *jdev,
+			   struct jesd204_dev_data *init,
+			   struct list_head *jdev_list);
 
 #endif /* _JESD204_PRIV_H_ */
