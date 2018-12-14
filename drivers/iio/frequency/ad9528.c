@@ -28,6 +28,8 @@
 #include <linux/iio/frequency/ad9528.h>
 #include <dt-bindings/iio/frequency/ad9528.h>
 
+#include <linux/jesd204/jesd204.h>
+
 #define AD9528_READ	(1 << 15)
 #define AD9528_WRITE	(0 << 15)
 #define AD9528_CNT(x)	(((x) - 1) << 13)
@@ -271,6 +273,7 @@ struct ad9528_state {
 	struct clk_onecell_data		clk_data;
 	struct clk			*clks[AD9528_NUM_CHAN];
 	struct gpio_desc			*reset_gpio;
+	struct jesd204_dev		*jdev;
 
 	unsigned long		vco_out_freq[AD9528_NUM_CLK_SRC];
 	unsigned long		sysref_src_pll2;
@@ -1369,6 +1372,10 @@ struct ad9528_platform_data *ad9528_parse_dt(struct device *dev)
 }
 #endif
 
+static struct jesd204_dev_data jesd204_ad9528_data = {
+	.name = "ad9528-jesd204",
+};
+
 static int ad9528_probe(struct spi_device *spi)
 {
 	struct ad9528_platform_data *pdata;
@@ -1441,8 +1448,18 @@ static int ad9528_probe(struct spi_device *spi)
 	if (ret)
 		goto error_disable_reg;
 
+	jesd204_ad9528_data.output_clocks = st->clks;
+	jesd204_ad9528_data.output_clocks_num = ARRAY_SIZE(st->clks);
+	st->jdev = jesd204_dev_register(&spi->dev, &jesd204_ad9528_data);
+	if (IS_ERR(st->jdev)) {
+		ret = PTR_ERR(st->jdev);
+		goto error_unreg_iio;
+	}
+
 	return 0;
 
+error_unreg_iio:
+	iio_device_unregister(indio_dev);
 error_disable_reg:
 	if (!IS_ERR(st->reg))
 		regulator_disable(st->reg);
@@ -1456,6 +1473,9 @@ static int ad9528_remove(struct spi_device *spi)
 	struct ad9528_state *st = iio_priv(indio_dev);
 
 	iio_device_unregister(indio_dev);
+
+	if (!IS_ERR(st->jdev))
+		jesd204_dev_unregister(st->jdev);
 
 	if (!IS_ERR(st->reg))
 		regulator_disable(st->reg);
