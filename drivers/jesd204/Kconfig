@@ -4,6 +4,7 @@
 
 menuconfig JESD204
 	tristate "JESD204 High-Speed Serial Interface Support"
+	depends on OF
 	help
 	  The JESD204 is a "Serial Interface for data converters"
 	  which describes a serialized interface between data converters

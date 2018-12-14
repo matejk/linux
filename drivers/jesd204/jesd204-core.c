@@ -14,6 +14,7 @@
 #include <linux/module.h>
 #include <linux/device.h>
 #include <linux/debugfs.h>
+#include <linux/of.h>
 #include <linux/slab.h>
 
 #include "jesd204-priv.h"
@@ -31,6 +32,13 @@ EXPORT_SYMBOL(jesd204_bus_type);
 
 static struct dentry *jesd204_debugfs_dentry;
 
+static struct device_node *of_jesd204_dev_get_node(struct device *dev)
+{
+	if (!dev->of_node)
+		return NULL;
+	return of_get_child_by_name(dev->of_node, "jesd204");
+}
+
 static int devm_jesd204_dev_match(struct device *dev, void *res, void *data)
 {
 	struct jesd204_dev **r = res;
@@ -46,11 +54,16 @@ static int devm_jesd204_dev_match(struct device *dev, void *res, void *data)
 struct jesd204_dev *jesd204_dev_register(struct device *dev,
 					 struct jesd204_dev_data *init)
 {
+	struct device_node *jnode;
 	struct jesd204_dev *jdev;
 	int ret;
 
 	if (!dev)
 		return ERR_PTR(-EINVAL);
+
+	jnode = of_jesd204_dev_get_node(dev);
+	if (!jnode)
+		return NULL;
 
 	if (!init || !init->name)
 		return ERR_PTR(-EINVAL);
@@ -117,6 +130,9 @@ struct jesd204_dev *devm_jesd204_dev_register(struct device *dev,
 					      struct jesd204_dev_data *init)
 {
 	struct jesd204_dev **jdevp, *jdev;
+
+	if (!of_jesd204_dev_get_node(dev))
+		return NULL;
 
 	jdevp = devres_alloc(devm_jesd204_dev_unreg, sizeof(*jdevp),
 			     GFP_KERNEL);
