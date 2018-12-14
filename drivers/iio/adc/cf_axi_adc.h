@@ -185,6 +185,7 @@ enum adc_data_sel {
 
 #include <linux/spi/spi.h>
 #include <linux/clk/clkscale.h>
+#include <linux/jesd204/jesd204.h>
 
 struct axiadc_chip_info {
 	char				*name;
@@ -235,6 +236,7 @@ struct axiadc_converter {
 	unsigned			scratch_reg[AXIADC_MAX_CHANNEL];
 	unsigned long 		adc_clk;
 	const struct axiadc_chip_info	*chip_info;
+	struct jesd204_dev	*jdev;
 
 	bool			sample_rate_read_only;
 

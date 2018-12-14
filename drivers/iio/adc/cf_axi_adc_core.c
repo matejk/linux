@@ -34,6 +34,7 @@ const unsigned int decimation_factors_available[] = {1, 8};
 
 struct axiadc_core_info {
 	unsigned int version;
+	struct jesd204_dev_data	jesd204_init_data;
 };
 
 static int axiadc_chan_to_regoffset(struct iio_chan_spec const *chan)
@@ -693,6 +694,13 @@ static const struct axiadc_core_info ad9361_6_00_a_info = {
 	.version = PCORE_VERSION(10, 0, 'a'),
 };
 
+static const struct axiadc_core_info ad9371_6_00_a_info = {
+	.version = PCORE_VERSION(10, 0, 'a'),
+	.jesd204_init_data = {
+		.name = "axi-ad9371-rx-1.0-jesd204",
+	},
+};
+
 static const struct axiadc_core_info ad9643_6_00_a_info = {
 	.version = PCORE_VERSION(10, 0, 'a'),
 };
@@ -712,7 +720,7 @@ static const struct of_device_id axiadc_of_match[] = {
 	{ .compatible = "adi,axi-ad9680-1.0", .data = &ad9680_6_00_a_info },
 	{ .compatible = "adi,axi-ad9625-1.0", .data = &ad9680_6_00_a_info },
 	{ .compatible = "adi,axi-ad6676-1.0", .data = &ad9680_6_00_a_info },
-	{ .compatible = "adi,axi-ad9371-rx-1.0", .data = &ad9361_6_00_a_info },
+	{ .compatible = "adi,axi-ad9371-rx-1.0", .data = &ad9371_6_00_a_info },
 	{ .compatible = "adi,axi-ad9684-1.0", .data = &ad9680_6_00_a_info },
 	{ .compatible = "adi,axi-adrv9009-rx-1.0", .data = &ad9361_6_00_a_info },
 	{ /* end of list */ },
@@ -867,6 +875,12 @@ static int axiadc_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_unconfigure_ring;
 
+	conv->jdev = jesd204_dev_register(&pdev->dev, &info->jesd204_init_data);
+	if (IS_ERR(conv->jdev)) {
+		ret = PTR_ERR(conv->jdev);
+		goto err_unreg_iio;
+	}
+
 	dev_info(&pdev->dev, "ADI AIM (%d.%.2d.%c) at 0x%08llX mapped to 0x%p,"
 		 " probed ADC %s as %s\n",
 		PCORE_VERSION_MAJOR(st->pcore_version),
@@ -883,6 +897,8 @@ static int axiadc_probe(struct platform_device *pdev)
 
 	return 0;
 
+err_unreg_iio:
+	iio_device_register(indio_dev);
 err_unconfigure_ring:
 	if (!st->dp_disable)
 			axiadc_unconfigure_ring_stream(indio_dev);
@@ -905,6 +921,10 @@ static int axiadc_remove(struct platform_device *pdev)
 {
 	struct iio_dev *indio_dev = platform_get_drvdata(pdev);
 	struct axiadc_state *st = iio_priv(indio_dev);
+	struct axiadc_converter *conv = to_converter(st->dev_spi);
+
+	if (!IS_ERR(conv->jdev))
+		jesd204_dev_unregister(conv->jdev);
 
 	iio_device_unregister(indio_dev);
 	if (!st->dp_disable && !axiadc_read(st, ADI_REG_ID) &&
