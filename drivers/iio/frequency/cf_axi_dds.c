@@ -34,6 +34,8 @@
 #include <linux/iio/sysfs.h>
 #include <linux/iio/buffer.h>
 
+#include <linux/jesd204/jesd204.h>
+
 #include "cf_axi_dds.h"
 #include "ad9122.h"
 
@@ -1231,6 +1233,7 @@ struct axidds_core_info {
 	struct cf_axi_dds_chip_info *chip_info;
 	unsigned int data_format;
 	unsigned int rate;
+	struct jesd204_dev_data jesd204_init_data;
 };
 
 static const struct axidds_core_info ad9122_6_00_a_info = {
@@ -1279,6 +1282,9 @@ static const struct axidds_core_info ad9371_6_00_a_info = {
 	.standalone = true,
 	.rate = 3,
 	.chip_info = &cf_axi_dds_chip_info_ad9371,
+	.jesd204_init_data = {
+		.name = "adi,axi-ad9371-tx-1.0-jesd204",
+	},
 };
 
 static const struct axidds_core_info ad9162_1_00_a_info = {
@@ -1568,6 +1574,12 @@ static int cf_axi_dds_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_unconfigure_buffer;
 
+	conv->jdev = jesd204_dev_register(&pdev->dev, &info->jesd204_init_data);
+	if (IS_ERR(conv->jdev)) {
+		ret = PTR_ERR(conv->jdev);
+		goto err_unreg_iio;
+	}
+
 	dev_info(&pdev->dev, "Analog Devices CF_AXI_DDS_DDS %s (%d.%.2d.%c) at 0x%08llX mapped"
 		" to 0x%p, probed DDS %s\n",
 		dds_read(st, ADI_REG_ID) ? "SLAVE" : "MASTER",
@@ -1586,6 +1598,8 @@ static int cf_axi_dds_probe(struct platform_device *pdev)
 
 	return 0;
 
+err_unreg_iio:
+	iio_device_register(indio_dev);
 err_unconfigure_buffer:
 	cf_axi_dds_unconfigure_buffer(indio_dev);
 err_converter_put:
@@ -1605,6 +1619,10 @@ static int cf_axi_dds_remove(struct platform_device *pdev)
 {
 	struct iio_dev *indio_dev = platform_get_drvdata(pdev);
 	struct cf_axi_dds_state *st = iio_priv(indio_dev);
+	struct cf_axi_converter *conv = to_converter(st->dev_spi);
+
+	if (!IS_ERR(conv->jdev))
+		jesd204_dev_unregister(conv->jdev);
 
 	iio_device_unregister(indio_dev);
 

@@ -281,6 +281,7 @@ struct cf_axi_converter {
 						 unsigned chan, unsigned pat1,
 						 unsigned pat2);
 	int		(*pcore_sync)(struct iio_dev *indio_dev);
+	struct jesd204_dev	*jdev;
 };
 
 static inline struct cf_axi_converter *to_converter(struct device *dev)
