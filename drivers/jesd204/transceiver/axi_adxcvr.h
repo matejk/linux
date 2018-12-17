@@ -73,6 +73,7 @@ struct adxcvr_state {
 	bool			tx_enable;
 	u32			sys_clk_sel;
 	u32			out_clk_sel;
+	struct jesd204_dev	*jdev;
 
 	struct clk		*clks[2];
 	struct clk_onecell_data clk_lookup;
