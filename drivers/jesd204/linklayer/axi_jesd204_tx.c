@@ -20,6 +20,7 @@
 #include <linux/platform_device.h>
 #include <linux/regmap.h>
 #include <linux/slab.h>
+#include <linux/jesd204/jesd204.h>
 
 #define PCORE_VERSION_MAJOR(version)		(version >> 16)
 #define PCORE_VERSION_MINOR(version)		((version >> 8) & 0xff)
@@ -85,6 +86,8 @@ struct axi_jesd204_tx {
 
 	struct clk *axi_clk;
 	struct clk *device_clk;
+
+	struct jesd204_dev *jdev;
 
 	int irq;
 
@@ -460,6 +463,10 @@ static int axi_jesd204_register_dummy_clk(struct axi_jesd204_tx *jesd,
 	return 0;
 }
 
+static struct jesd204_dev_data axi_jesd204_tx_data = {
+	.name = "adi,axi-jesd204-tx-1.0-jesd204",
+};
+
 static int axi_jesd204_tx_probe(struct platform_device *pdev)
 {
 	struct jesd204_tx_config config;
@@ -561,6 +568,13 @@ static int axi_jesd204_tx_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, jesd);
 
+	jesd->jdev = jesd204_dev_register(&pdev->dev, &axi_jesd204_tx_data);
+	if (IS_ERR(jesd->jdev)) {
+		ret = PTR_ERR(jesd->jdev);
+		goto err_disable_device_clk;
+	}
+
+
 	return 0;
 err_disable_device_clk:
 /*
@@ -578,6 +592,9 @@ static int axi_jesd204_tx_remove(struct platform_device *pdev)
 {
 	struct axi_jesd204_tx *jesd = platform_get_drvdata(pdev);
 	int irq = platform_get_irq(pdev, 0);
+
+	if (jesd->jdev)
+		jesd204_dev_unregister(jesd->jdev);
 
 	of_clk_del_provider(pdev->dev.of_node);
 
