@@ -15,6 +15,7 @@
 #include <linux/of.h>
 #include <linux/module.h>
 #include <linux/err.h>
+#include <linux/jesd204/jesd204.h>
 
 #define AXI_CLKGEN_V2_REG_RESET		0x40
 #define AXI_CLKGEN_V2_REG_CLKSEL	0x44
@@ -46,6 +47,7 @@
 struct axi_clkgen {
 	void __iomem *base;
 	struct clk_hw clk_hw;
+	struct jesd204_dev *jdev;
 };
 
 static uint32_t axi_clkgen_lookup_filter(unsigned int m)
@@ -494,6 +496,10 @@ static const struct of_device_id axi_clkgen_ids[] = {
 };
 MODULE_DEVICE_TABLE(of, axi_clkgen_ids);
 
+static struct jesd204_dev_data axi_clkgen_jesd204_data = {
+	.name = "adi,axi-clkgen-2.00.a-jesd204",
+};
+
 static int axi_clkgen_probe(struct platform_device *pdev)
 {
 	const struct of_device_id *id;
@@ -502,6 +508,7 @@ static int axi_clkgen_probe(struct platform_device *pdev)
 	const char *parent_names[2];
 	const char *clk_name;
 	struct resource *mem;
+	struct clk *clks[1];
 	unsigned int i;
 	int ret;
 
@@ -543,12 +550,23 @@ static int axi_clkgen_probe(struct platform_device *pdev)
 	axi_clkgen_mmcm_enable(axi_clkgen, false);
 
 	axi_clkgen->clk_hw.init = &init;
-	ret = devm_clk_hw_register(&pdev->dev, &axi_clkgen->clk_hw);
+	clks[0] = devm_clk_register(&pdev->dev, &axi_clkgen->clk_hw);
+	if (IS_ERR(clks[0]))
+		return PTR_ERR(clks[0]);
+
+	ret = of_clk_add_hw_provider(pdev->dev.of_node, of_clk_hw_simple_get,
+				     &axi_clkgen->clk_hw);
 	if (ret)
 		return ret;
 
-	return of_clk_add_hw_provider(pdev->dev.of_node, of_clk_hw_simple_get,
-				      &axi_clkgen->clk_hw);
+	axi_clkgen_jesd204_data.output_clocks = clks;
+	axi_clkgen_jesd204_data.output_clocks_num = ARRAY_SIZE(clks);
+	axi_clkgen->jdev = devm_jesd204_dev_register(&pdev->dev,
+						     &axi_clkgen_jesd204_data);
+	if (IS_ERR(axi_clkgen->jdev))
+		return PTR_ERR(axi_clkgen->jdev);
+
+	return 0;
 }
 
 static int axi_clkgen_remove(struct platform_device *pdev)
