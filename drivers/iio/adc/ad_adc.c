@@ -26,6 +26,7 @@ struct adc_chip_info {
 	const struct iio_chan_spec *channels;
 	unsigned int num_channels;
 	unsigned int ctrl_flags;
+	struct jesd204_dev_data	jesd204_init_data;
 };
 
 #define CN0363_CHANNEL(_address, _type, _ch, _mod, _rb) { \
@@ -112,6 +113,9 @@ static const struct adc_chip_info ad9371_obs_rx_chip_info = {
 	.channels = ad9371_obs_rx_channels,
 	.num_channels = ARRAY_SIZE(ad9371_obs_rx_channels),
 	.ctrl_flags = ADI_FORMAT_SIGNEXT | ADI_FORMAT_ENABLE,
+	.jesd204_init_data = {
+		.name = "adi,axi-ad9371-obs-1.0-jesd204"
+	},
 };
 
 static const struct iio_chan_spec m2k_adc_channels[] = {
@@ -318,8 +322,16 @@ static int adc_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_unconfigure_ring;
 
+	st->jdev = jesd204_dev_register(&pdev->dev, &info->jesd204_init_data);
+	if (IS_ERR(st->jdev)) {
+		ret = PTR_ERR(st->jdev);
+		goto err_unreg_iio;
+	}
+
 	return 0;
 
+err_unreg_iio:
+	iio_device_unregister(indio_dev);
 err_unconfigure_ring:
 	axiadc_unconfigure_ring_stream(indio_dev);
 err_free_frontend:
@@ -333,6 +345,9 @@ static int adc_remove(struct platform_device *pdev)
 {
 	struct iio_dev *indio_dev = platform_get_drvdata(pdev);
 	struct axiadc_state *st = iio_priv(indio_dev);
+
+	if (st->jdev)
+		jesd204_dev_unregister(st->jdev);
 
 	iio_device_unregister(indio_dev);
 	axiadc_unconfigure_ring_stream(indio_dev);

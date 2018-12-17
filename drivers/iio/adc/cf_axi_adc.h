@@ -215,6 +215,7 @@ struct axiadc_state {
 	bool				dp_disable;
 	unsigned long long		adc_clk;
 	unsigned			have_slave_channels;
+	struct jesd204_dev		*jdev;
 
 	struct iio_hw_consumer		*frontend;
 
