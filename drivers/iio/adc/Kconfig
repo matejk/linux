@@ -220,6 +220,15 @@ config ADMC
 	  AD-FMCMOTCON1 device drivers. Provides direct access
 	  via sysfs.
 
+config ADC_M2K
+	tristate "Analog Devices ADC M2K driver"
+	depends on SPI
+	select CF_AXI_ADC
+	help
+	  Say yes here to build support for Analog Devices:
+	  ADC M2K device drivers. Provides direct access
+	  via sysfs.
+
 config CF_AXI_FFT
 	tristate "Generic FFT driver"
 
