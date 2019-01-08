@@ -10,12 +10,15 @@ config IIO_DUMMY_EVGEN
 
 config IIO_SIMPLE_DUMMY
        tristate "An example driver with no hardware requirements"
+       select IIO_DUMMY_EVGEN
+       select IIO_SIMPLE_DUMMY_EVENTS
+       select IIO_SIMPLE_DUMMY_BUFFER
        help
 	 Driver intended mainly as documentation for how to write
 	 a driver. May also be useful for testing userspace code
 	 without hardware.
 
-if IIO_SIMPLE_DUMMY
+#if IIO_SIMPLE_DUMMY
 
 config IIO_SIMPLE_DUMMY_EVENTS
        bool "Event generation support"
@@ -25,16 +28,16 @@ config IIO_SIMPLE_DUMMY_EVENTS
 
 config IIO_SIMPLE_DUMMY_BUFFER
 	bool "Buffered capture support"
-	select IIO_BUFFER
-	select IIO_TRIGGER
-	select IIO_KFIFO_BUF
-        select IIO_BUFFER_DMA
-        select IIO_BUFFER_DMAENGINE
-        select IIO_HW_CONSUMER
-        select IIO_CONFIGFS
+#	select IIO_BUFFER
+#	select IIO_TRIGGER
+#	select IIO_KFIFO_BUF
+#       select IIO_BUFFER_DMA
+#        select IIO_BUFFER_DMAENGINE
+#        select IIO_HW_CONSUMER
+#        select IIO_CONFIGFS
 	help
 	  Add buffered data capture to the simple dummy driver.
 
-endif # IIO_SIMPLE_DUMMY
+#endif # IIO_SIMPLE_DUMMY
 
 endmenu
