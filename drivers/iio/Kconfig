@@ -14,6 +14,12 @@ if IIO
 
 config IIO_BUFFER
 	bool "Enable buffer support within IIO"
+	select IIO_BUFFER_DMA
+	select IIO_BUFFER_DMAENGINE
+	select IIO_HW_CONSUMER
+	select IIO_TRIGGERED_BUFFER
+	select IIO_INTERRUPT_TRIGGER
+	select IIO_TRIGGERED_EVENT
 	help
 	  Provide core support for various buffer based data
 	  acquisition methods.
