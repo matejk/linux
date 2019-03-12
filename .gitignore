@@ -115,3 +115,12 @@ all.config
 
 # Kdevelop4
 *.kdev4
+
+# Petalinux
+oe-logs
+oe-workdir
+
+# Eclipse project
+!.cproject
+!.project
+
