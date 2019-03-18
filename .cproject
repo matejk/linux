@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="xilinx.gnu.arm.a53.linux.toolchain.1712863078">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="xilinx.gnu.arm.a53.linux.toolchain.1712863078" moduleId="org.eclipse.cdt.core.settings" name="Default">
+				<externalSettings/>
+				<extensions>
+					<extension id="com.xilinx.sdk.managedbuilder.XELF.arm.a53.linux" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildProperties="" description="" id="xilinx.gnu.arm.a53.linux.toolchain.1712863078" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="xilinx.gnu.arm.a53.linux.toolchain.1712863078.1663063455" name="/" resourcePath="">
+						<toolChain id="xilinx.gnu.arm.a53.linux.toolchain.1853788990" name="Xilinx ARM v8 GNU/Linux Toolchain" superClass="xilinx.gnu.arm.a53.linux.toolchain">
+							<targetPlatform binaryParser="com.xilinx.sdk.managedbuilder.XELF.arm.a53.linux" id="xilinx.arm.a53.linux.target.gnu.base.2007497473" isAbstract="false" name="Debug Platform" superClass="xilinx.arm.a53.linux.target.gnu.base"/>
+							<builder id="xilinx.gnu.arm.a53.linux.toolchain.builder.1860263513" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="GNU make" superClass="xilinx.gnu.arm.a53.linux.toolchain.builder"/>
+							<tool id="xilinx.gnu.arm.a53.linux.c.toolchain.assembler.1698168790" name="ARM v8 Linux gcc assembler" superClass="xilinx.gnu.arm.a53.linux.c.toolchain.assembler">
+								<inputType id="xilinx.gnu.assembler.input.1833177187" superClass="xilinx.gnu.assembler.input"/>
+							</tool>
+							<tool id="xilinx.gnu.arm.a53.linux.c.toolchain.compiler.1131386537" name="ARM v8 Linux gcc compiler" superClass="xilinx.gnu.arm.a53.linux.c.toolchain.compiler">
+								<option id="xilinx.gnu.compiler.dircategory.includes.971849141" name="Include Paths" superClass="xilinx.gnu.compiler.dircategory.includes" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/linux-uberscope_devm2k/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/linux-uberscope_devm2k/include/uapi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/linux-uberscope_devm2k/arch/arm64/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/linux-uberscope_devm2k/arch/arm64/include/uapi}&quot;"/>
+								</option>
+								<option id="xilinx.gnu.compiler.symbols.defined.1346033465" name="Defined symbols (-D)" superClass="xilinx.gnu.compiler.symbols.defined" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__KERNEL__=1"/>
+								</option>
+								<inputType id="xilinx.gnu.arm.a53.linux.c.compiler.input.301821617" name="C source files" superClass="xilinx.gnu.arm.a53.linux.c.compiler.input"/>
+							</tool>
+							<tool id="xilinx.gnu.arm.a53.linux.cxx.toolchain.compiler.1599049438" name="ARM v8 Linux g++ compiler" superClass="xilinx.gnu.arm.a53.linux.cxx.toolchain.compiler"/>
+							<tool id="xilinx.gnu.arm.a53.linux.toolchain.archiver.749277634" name="ARM v8 Linux archiver" superClass="xilinx.gnu.arm.a53.linux.toolchain.archiver"/>
+							<tool id="xilinx.gnu.arm.a53.linux.c.toolchain.linker.1138720325" name="ARM v8 Linux gcc linker" superClass="xilinx.gnu.arm.a53.linux.c.toolchain.linker">
+								<inputType id="xilinx.gnu.linker.input.1257567847" superClass="xilinx.gnu.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+								<inputType id="xilinx.gnu.linker.input.lscript.1854896135" name="Linker Script" superClass="xilinx.gnu.linker.input.lscript"/>
+							</tool>
+							<tool id="xilinx.gnu.arm.a53.linux.cxx.toolchain.linker.221603395" name="ARM v8 Linux g++ linker" superClass="xilinx.gnu.arm.a53.linux.cxx.toolchain.linker"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="arch/alpha/|arch/arc/|arch/arm/|arch/avr32/|arch/blackfin/|arch/c6x/|arch/cris/|arch/frv/|arch/h8300/|arch/hexagon/|arch/ia64/|arch/m32r/|arch/m68k/|arch/metag/|arch/microblaze/|arch/mips/|arch/mn10300/|arch/nios2/|arch/openrisc/|arch/parisc/|arch/powerpc/|arch/s390/|arch/score/|arch/sh/|arch/sparc/|arch/tile/|arch/um/|arch/unicore32/|arch/x86/|arch/xtensa/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="linux-uberscope_devm2k.null.1252935754" name="linux-uberscope_devm2k"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="xilinx.gnu.arm.a53.linux.toolchain.1712863078;xilinx.gnu.arm.a53.linux.toolchain.1712863078.1663063455;xilinx.gnu.arm.a53.linux.c.toolchain.compiler.1131386537;xilinx.gnu.arm.a53.linux.c.compiler.input.301821617">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.xilinx.managedbuilder.ui.ARMA53LinuxGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="xilinx.gnu.arm.a53.linux.toolchain.1712863078;xilinx.gnu.arm.a53.linux.toolchain.1712863078.1663063455">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.xilinx.managedbuilder.ui.ARMA53LinuxGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+</cproject>
