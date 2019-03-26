@@ -120,7 +120,3 @@ all.config
 oe-logs
 oe-workdir
 
-# Eclipse project
-!.cproject
-!.project
-
