@@ -383,11 +383,6 @@ CONFIG_CMA_DEBUGFS=y
 CONFIG_LOCALVERSION="uberscopes"
 
 #
-# Common Clock Framework
-#
-CONFIG_COMMON_CLK_ADF4360=m
-
-#
 # Debug
 #
 CONFIG_DEBUG_OBJECTS=y
