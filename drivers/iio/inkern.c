@@ -77,20 +77,22 @@ int iio_map_array_unregister(struct iio_dev *indio_dev)
 }
 EXPORT_SYMBOL_GPL(iio_map_array_unregister);
 
-static const struct iio_chan_spec
+const struct iio_chan_spec
 *iio_chan_spec_from_name(const struct iio_dev *indio_dev, const char *name)
 {
 	int i;
 	const struct iio_chan_spec *chan = NULL;
 
-	for (i = 0; i < indio_dev->num_channels; i++)
+	for (i = 0; i < indio_dev->num_channels; i++) {
 		if (indio_dev->channels[i].datasheet_name &&
 		    strcmp(name, indio_dev->channels[i].datasheet_name) == 0) {
 			chan = &indio_dev->channels[i];
 			break;
 		}
+	}
 	return chan;
 }
+EXPORT_SYMBOL_GPL(iio_chan_spec_from_name);
 
 #ifdef CONFIG_OF
 
@@ -279,7 +281,7 @@ static inline struct iio_channel *of_iio_channel_get_all(struct device *dev)
 
 #endif /* CONFIG_OF */
 
-static struct iio_channel *iio_channel_get_sys(const char *name,
+struct iio_channel *iio_channel_get_sys(const char *name,
 					       const char *channel_name)
 {
 	struct iio_map_internal *c_i = NULL, *c = NULL;
@@ -331,6 +333,7 @@ error_no_mem:
 	iio_device_put(c->indio_dev);
 	return ERR_PTR(err);
 }
+EXPORT_SYMBOL_GPL(iio_channel_get_sys);
 
 struct iio_channel *iio_channel_get(struct device *dev,
 				    const char *channel_name)
@@ -527,7 +530,7 @@ void devm_iio_channel_release_all(struct device *dev,
 }
 EXPORT_SYMBOL_GPL(devm_iio_channel_release_all);
 
-static int iio_channel_read(struct iio_channel *chan, int *val, int *val2,
+int iio_channel_read(struct iio_channel *chan, int *val, int *val2,
 	enum iio_chan_info_enum info)
 {
 	int unused;
@@ -553,6 +556,7 @@ static int iio_channel_read(struct iio_channel *chan, int *val, int *val2,
 
 	return ret;
 }
+EXPORT_SYMBOL_GPL(iio_channel_read);
 
 int iio_read_channel_raw(struct iio_channel *chan, int *val)
 {
@@ -666,7 +670,7 @@ err_unlock:
 }
 EXPORT_SYMBOL_GPL(iio_convert_raw_to_processed);
 
-static int iio_read_channel_attribute(struct iio_channel *chan,
+int iio_read_channel_attribute(struct iio_channel *chan,
 				      int *val, int *val2,
 				      enum iio_chan_info_enum attribute)
 {
@@ -684,6 +688,7 @@ err_unlock:
 
 	return ret;
 }
+EXPORT_SYMBOL_GPL(iio_read_channel_attribute);
 
 int iio_read_channel_offset(struct iio_channel *chan, int *val, int *val2)
 {
@@ -724,7 +729,7 @@ int iio_read_channel_scale(struct iio_channel *chan, int *val, int *val2)
 }
 EXPORT_SYMBOL_GPL(iio_read_channel_scale);
 
-static int iio_channel_read_avail(struct iio_channel *chan,
+int iio_channel_read_avail(struct iio_channel *chan,
 				  const int **vals, int *type, int *length,
 				  enum iio_chan_info_enum info)
 {
@@ -734,6 +739,7 @@ static int iio_channel_read_avail(struct iio_channel *chan,
 	return chan->indio_dev->info->read_avail(chan->indio_dev, chan->channel,
 						 vals, type, length, info);
 }
+EXPORT_SYMBOL_GPL(iio_channel_read_avail);
 
 int iio_read_avail_channel_raw(struct iio_channel *chan,
 			       const int **vals, int *length)
@@ -845,12 +851,13 @@ err_unlock:
 }
 EXPORT_SYMBOL_GPL(iio_get_channel_type);
 
-static int iio_channel_write(struct iio_channel *chan, int val, int val2,
+int iio_channel_write(struct iio_channel *chan, int val, int val2,
 			     enum iio_chan_info_enum info)
 {
 	return chan->indio_dev->info->write_raw(chan->indio_dev,
 						chan->channel, val, val2, info);
 }
+EXPORT_SYMBOL_GPL(iio_channel_write);
 
 int iio_write_channel_raw(struct iio_channel *chan, int val)
 {
@@ -911,7 +918,7 @@ unsigned int iio_get_channel_ext_info_count(struct iio_channel *chan)
 }
 EXPORT_SYMBOL_GPL(iio_get_channel_ext_info_count);
 
-static const struct iio_chan_spec_ext_info *iio_lookup_ext_info(
+const struct iio_chan_spec_ext_info *iio_lookup_ext_info(
 						const struct iio_channel *chan,
 						const char *attr)
 {
@@ -927,6 +934,7 @@ static const struct iio_chan_spec_ext_info *iio_lookup_ext_info(
 
 	return NULL;
 }
+EXPORT_SYMBOL_GPL(iio_lookup_ext_info);
 
 ssize_t iio_read_channel_ext_info(struct iio_channel *chan,
 				  const char *attr, char *buf)
